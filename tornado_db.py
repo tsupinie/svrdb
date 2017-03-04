@@ -24,28 +24,23 @@ class TornadoDB(object):
     @classmethod
     def from_file_obj(cls, fobj):
         col_names = [
-            'OM Number', 'Year', 'Month', 'Day', 'Date', 'Time', 'Timezone', 'State', 'State FIPS', 'State Sequence',
-            'F-Scale', 'Injuries', 'Fatalities', 'Property Loss', 'Crop Loss', 
-            'Start Latitude', 'Start Longitude', 'End Latitude', 'End Longitude', 'Length', 'Width',
-            'Number of States', 'State Number', 'Segment Number', 'County FIPS 1', 'County FIPS 2', 'County FIPS 3', 'County FIPS 4',
-            'F-Scale Modified'
+            u'om_number', u'year', u'month', u'day', u'date', u'time', u'time_zone', 
+            u'state', u'state_fips', u'state_seq', 
+            u'f_scale', u'injuries', u'fatalities', u'prpty_loss', u'crop_loss', 
+            u'start_lat', u'start_lon', u'end_lat', u'end_lon', u'length', u'width', 
+            u'num_states', u'state_num', u'seg_num', u'county_fips1', u'county_fips2', u'county_fips3', u'county_fips4', 
+            u'f_scale_mod'
         ]
 
         db = pd.read_csv(fobj, header=None, names=col_names, index_col=False)
-        dts = [datetime.strptime("%s %s" % (d, t), "%Y-%m-%d %H:%M:%S") for d, t in izip(db['Date'], db['Time'])]
-        tds = [timedelta(hours=0) if tz == 9 else timedelta(hours=6) for tz in db['Timezone']]
+        dts = [datetime.strptime("%s %s" % (d, t), "%Y-%m-%d %H:%M:%S") for d, t in izip(db['date'], db['time'])]
+        tds = [timedelta(hours=0) if tz == 9 else timedelta(hours=6) for tz in db['time_zone']]
 
         dt = pd.to_datetime(pd.Series([dt + td for dt, td in izip(dts, tds)], index=db.index))
+
+        del db['date'], db['time'], db['time_zone'], db['year'], db['month'], db['day']
+
         db['time'] = dt
-        del db['Date'], db['Time'],  db['Timezone']
-        del db['Year'], db['Month'], db['Day']
-
-        db.columns = pd.Index([u'om_number', u'state', u'state_fips', u'state_seq', u'f_scale',
-               u'injuries', u'fatalities', u'prpty_loss', u'crop_loss', u'start_lat',
-               u'start_lon', u'end_lat', u'end_lon', u'length', u'width', u'num_states',
-               u'state_num', u'seg_num', u'county_fips1', u'county_fips2', u'county_fips3',
-               u'county_fips4', u'f_scale_mod',  u'time'])
-
         db.set_index('time', inplace=True)
 
         db_start = db.iloc[0].name.to_pydatetime().replace(month=1, day=1, hour=0, minute=0)
