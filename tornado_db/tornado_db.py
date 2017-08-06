@@ -7,7 +7,20 @@ from itertools import izip
 from collections import OrderedDict, defaultdict
 from urllib2 import urlopen
 
+class MultiValueColumn(object):
+    def __init__(self):
+        pass
+
 class TornadoDB(object):
+    def_col_names = [
+        u'om_number', u'year', u'month', u'day', u'date', u'time', u'time_zone', 
+        u'state', u'state_fips', u'state_seq', 
+        u'f_scale', u'injuries', u'fatalities', u'prpty_loss', u'crop_loss', 
+        u'start_lat', u'start_lon', u'end_lat', u'end_lon', u'length', u'width', 
+        u'num_states', u'state_num', u'seg_num', u'county_fips1', u'county_fips2', u'county_fips3', u'county_fips4', 
+        u'f_scale_mod'
+    ]
+
     def __init__(self, db, meta):
         self._db = db
         self._meta = meta
@@ -18,21 +31,12 @@ class TornadoDB(object):
 
     @classmethod
     def from_web(cls):
-        url = "http://www.spc.noaa.gov/wcm/data/Actual_tornadoes.csv"
+        url = "http://www.spc.noaa.gov/wcm/data/1950-2016_actual_tornadoes.csv"
         return cls.from_file_obj(urlopen(url))
 
     @classmethod
     def from_file_obj(cls, fobj):
-        col_names = [
-            u'om_number', u'year', u'month', u'day', u'date', u'time', u'time_zone', 
-            u'state', u'state_fips', u'state_seq', 
-            u'f_scale', u'injuries', u'fatalities', u'prpty_loss', u'crop_loss', 
-            u'start_lat', u'start_lon', u'end_lat', u'end_lon', u'length', u'width', 
-            u'num_states', u'state_num', u'seg_num', u'county_fips1', u'county_fips2', u'county_fips3', u'county_fips4', 
-            u'f_scale_mod'
-        ]
-
-        db = pd.read_csv(fobj, header=None, names=col_names, index_col=False)
+        db = pd.read_csv(fobj, header=0, names=TornadoDB.def_col_names, index_col=False)
         dts = [datetime.strptime("%s %s" % (d, t), "%Y-%m-%d %H:%M:%S") for d, t in izip(db['date'], db['time'])]
         tds = [timedelta(hours=0) if tz == 9 else timedelta(hours=6) for tz in db['time_zone']]
 
@@ -41,6 +45,16 @@ class TornadoDB(object):
         del db['date'], db['time'], db['time_zone'], db['year'], db['month'], db['day']
 
         db['time'] = dt
+        n_states_max = db['num_states'].max()
+
+        def _remove_dups(df):
+            return df
+
+        db_years = []
+        for year, df in pd.groupby(db, by=db.time.dt.year):
+            db_years.append(_remove_dups(df))
+
+        db = pd.concat(db_years)
         db.set_index('time', inplace=True)
 
         db_start = db.iloc[0].name.to_pydatetime().replace(month=1, day=1, hour=0, minute=0)
@@ -51,6 +65,24 @@ class TornadoDB(object):
             'db_end': db_end,
         }
         return cls(db, meta)
+
+    def to_csv(self, path):
+        col_names = [
+            'om', 'yr', 'mo', 'dy', 'date', 'time', 'tz', 'st', 'stf', 'stn', 'mag', 'inj', 'fat', 'loss', 'closs', 
+            'slat', 'slon', 'elat', 'elon', 'len', 'wid', 'ns', 'sn', 'sg', 'f1', 'f2', 'f3', 'f4', 'fc'
+        ]
+        db = self._db.copy()
+
+        db['date'] = [ dt.strftime("%Y-%m-%d") for dt in db.index ]
+        db['year'] = [ dt.year for dt in db.index ]
+        db['month'] = [ dt.month for dt in db.index ]
+        db['day'] = [ dt.day for dt in db.index ]
+        db['time'] = [ dt.strftime("%H:%M:%S") for dt in db.index ]
+        db['time_zone'] = [ 9 for dt in db.index ]
+
+        db.reset_index(drop=True, inplace=True)
+        db = db[TornadoDB.def_col_names]
+        db.to_csv(path, header=col_names, index=False)
 
     def search(self, **kwargs):
         new_db = self._db
@@ -90,7 +122,7 @@ class TornadoDB(object):
                                                 self._db.index.month, 
                                                 self._db.index.day, 
                                                 self._db.index.hour]):
-            dt = datetime.strptime("%d%d%d%d" % day, "%Y%m%d%H")
+            dt = datetime.strptime("%04d%02d%02d%02d" % day, "%Y%m%d%H")
             if dt.hour < 12:
                 dt -= timedelta(days=1)
         
@@ -116,13 +148,15 @@ class TornadoDB(object):
     def count(self):
         return len(self._db)
 
-    def meta(*args):
+    def meta(self, *args):
         meta_vals = {}
 
         if args == []:
             meta_vals.update(self._meta)
+        elif len(args) == 1:
+            meta_vals = self._meta[args[0]]
         else:
-            for arg in arg:
+            for arg in args:
                 meta_vals[arg] = self._meta[arg]
 
         return meta_vals
@@ -170,16 +204,19 @@ class TornadoDB(object):
         return get_vals
 
 if __name__ == "__main__":
-    db = TornadoDB.from_csv()
-    ok_nov = db.search(state='OK', time=TornadoDB.bymonth(11), f_scale=lambda f: f >= 2)
+    db = TornadoDB.from_csv(path="/data/tornadoes.csv")
+#   db.to_csv("/data/tornadoes_2016.csv")
+    print "There are %d tornadoes in the database" % db.count()
+
+#   ok_nov = db.search(state='OK', time=TornadoDB.bymonth(11), f_scale=lambda f: f >= 2)
 #   ok_nov.list()
 
-    print "November strong-violent tornado days in Oklahoma:"
-    for day, tors in ok_nov.days().iteritems():
-        print "%s (%d)" % (day.strftime('%d %b %Y'), tors.count())
+#   print "November strong-violent tornado days in Oklahoma:"
+#   for day, tors in ok_nov.days().iteritems():
+#       print "%s (%d)" % (day.strftime('%d %b %Y'), tors.count())
 
-    print
-    db.search(state='KS', time=[TornadoDB.bymonth('March', 'Apr', 5), TornadoDB.byyear(1991)]).list() 
+#   print
+#   db.search(state='KS', time=[TornadoDB.bymonth('March', 'Apr', 5), TornadoDB.byyear(1991)]).list() 
 
 #   db.search(state=['OK', 'KS'], time=TornadoDB.bycday(datetime(2011, 5, 24))).list()
 #   db.search(length=lambda l: l > 100).list()
