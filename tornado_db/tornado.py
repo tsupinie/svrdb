@@ -4,6 +4,20 @@ import ast
 from collections import defaultdict
 
 class TornadoSegment(object):
+    aliases = {
+        'state':'st',
+        'magnitude':'mag',
+        'fatalities':'fat',
+        'injuries':'inj',
+        'length':'len',
+        'width':'wid',
+        'start_lat':'slat',
+        'end_lat':'elat',
+        'start_lon':'slon',
+        'end_lon':'elon',
+        'counties':'cty_fips',
+    }
+
     def __init__(self, **kwargs):
         tor_dt = datetime.strptime("%s %s" % (kwargs['date'], kwargs['time']), "%Y-%m-%d %H:%M:%S")
         tz_offset = timedelta(hours=6) if kwargs['tz'] == 3 else timedelta(hours=0)
@@ -43,6 +57,11 @@ class TornadoSegment(object):
         return merge_sg
 
     def __getitem__(self, attr):
+        try:
+            attr = TornadoSegment.aliases[attr]
+        except KeyError:
+            pass
+
         return self._attrs[attr]
 
     def __str__(self):
@@ -64,18 +83,6 @@ class TornadoSegment(object):
 
 
 class Tornado(object):
-    aliases = {
-        'fatalities':'fat',
-        'injuries':'inj',
-        'length':'len',
-        'width':'wid',
-        'start_lat':'slat',
-        'end_lat':'elat',
-        'start_lon':'slon',
-        'end_lon':'elon',
-        'counties':'cty_fips',
-    }
-
     def __init__(self, segments):
         self._segs = segments
 
@@ -144,7 +151,7 @@ class Tornado(object):
 
     def __getitem__(self, attr):
         try:
-            db_attr = Tornado.aliases[attr]
+            db_attr = TornadoSegment.aliases[attr]
         except KeyError:
             db_attr = attr
 

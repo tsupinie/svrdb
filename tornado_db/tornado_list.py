@@ -3,6 +3,7 @@ from tornado import TornadoFactory
 
 import sys
 from math import log10
+from datetime import datetime, timedelta
 
 class TornadoList(object):
     def __init__(self, *lst):
@@ -52,9 +53,50 @@ class TornadoList(object):
             stream.write(str(tor))
             stream.write("\n")
 
+def byyear(*years):
+    def get_vals(time):
+        return (time - timedelta(hours=12)).year in years
+    return get_vals
+
+
+def bymonth(*months):
+    month_names = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december']
+    month_abrvs = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+
+    def try_strings(mo):
+        try:
+            mo_num = month_names.index(mo.lower()) + 1
+        except (ValueError, AttributeError):
+            try:
+                mo_num = month_abrvs.index(mo.lower()) + 1
+            except (ValueError, AttributeError):
+                mo_num = mo
+        return mo_num
+
+    month_nums = [ try_strings(mo) for mo in months ]
+
+    def get_vals(time):
+        return (time - timedelta(hours=12)).month in month_nums
+    return get_vals
+
+
+def bycday(*days):
+    cday_starts = [ d.replace(hour=12, minute=0, second=0, microsecond=0) for d in days ]
+    cday_ends = [ d + timedelta(days=1) for d in cday_starts ]
+
+    def get_vals(time):
+        return any(cds <= time < cde for cds, cde in izip(cday_starts, cday_ends))
+    return get_vals
+
+
+def byhour(*hours):
+    def get_vals(time):
+        return time.hour in hours
+    return get_vals
+
 
 if __name__ == "__main__":
     tls = TornadoList.from_csv('/data/All_tornadoes.csv')
 
-    ok_vio = tls.search(st='OK', mag=lambda m: m >= 5)
-    ok_vio.list()
+    ok_stg_aug = tls.search(state='OK', time=bymonth('AUGUST'), magnitude=lambda m: m >= 2)
+    ok_stg_aug.list()
