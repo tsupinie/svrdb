@@ -2,6 +2,7 @@
 from datetime import datetime, timedelta
 import ast
 from collections import defaultdict
+from searchable import SearchableItem
 
 class TornadoSegment(object):
     aliases = {
@@ -82,38 +83,9 @@ class TornadoSegment(object):
             self._attrs['om'] = 576454
 
 
-class Tornado(object):
+class Tornado(SearchableItem):
     def __init__(self, segments):
         self._segs = segments
-
-    def matches(self, **kwargs):
-        is_match = True
-        for attr, val in kwargs.items():
-            this_val = self[attr]
-            try:
-                # Try for function-type items
-                try:
-                    for v in val:
-                        is_match &= v(this_val)
-                except TypeError:
-                    is_match &= val(this_val)
-            except TypeError:
-                # Try for other-type items
-                if isinstance(val, str):
-                    val = [val]
-
-                try:
-                    sval = set(val)
-                except TypeError:
-                    sval = set([val])
-
-                common = list(sval & set(this_val))
-                is_match &= (len(common) > 0)
-
-            if not is_match:
-                break
-
-        return is_match
 
     def __str__(self):
         time_str = self['time'].strftime("%Y-%m-%d %H:%M")

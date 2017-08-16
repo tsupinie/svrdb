@@ -1,13 +1,14 @@
 
 from tornado import TornadoFactory
+from searchable import Searchable
 
 import sys
 from math import log10
 from datetime import datetime, timedelta
 
-class TornadoList(object):
+class TornadoList(Searchable):
     def __init__(self, *lst):
-        self._tors = lst
+        super(TornadoList, self).__init__(*lst)
 
     @classmethod
     def from_csv(cls, fname):
@@ -34,12 +35,8 @@ class TornadoList(object):
 
         return cls(*tors)
 
-    def search(self, **kwargs):
-        new_tors = [tor for tor in self._tors if tor.matches(**kwargs)]
-        return TornadoList(*new_tors)
-
     def list(self, stream=sys.stdout):
-        n_places = int(log10(len(self._tors))) + 1
+        n_places = int(log10(len(self))) + 1
         num_str = "%%%dd" % n_places
         stream.write(" " * (n_places + 2))
         stream.write("---Time-(UTC)--- ")
@@ -47,7 +44,7 @@ class TornadoList(object):
         stream.write(" -Mag-")
         stream.write("\n")
 
-        for idx, tor in enumerate(self._tors):
+        for idx, tor in enumerate(self):
             stream.write(num_str % (idx + 1))
             stream.write(". ")
             stream.write(str(tor))
