@@ -5,11 +5,9 @@ from searchable import Searchable
 import sys
 from math import log10
 from datetime import datetime, timedelta
+from collections import OrderedDict, defaultdict
 
 class TornadoList(Searchable):
-    def __init__(self, *lst):
-        super(TornadoList, self).__init__(*lst)
-
     @classmethod
     def from_csv(cls, fname):
         return cls.from_fobj(open(fname))
@@ -49,6 +47,15 @@ class TornadoList(Searchable):
             stream.write(". ")
             stream.write(str(tor))
             stream.write("\n")
+
+    def days(self):
+        tor_days = defaultdict(list)
+        for tor in self:
+            tor_day = (tor['time'] - timedelta(hours=12)).replace(hour=12, minute=0, second=0, microsecond=0)
+            tor_days[tor_day].append(tor)
+
+        return OrderedDict((tor_day, type(self)(tor_days[tor_day])) for tor_day in sorted(tor_days.keys()))
+
 
 def byyear(*years):
     def get_vals(time):
@@ -97,3 +104,4 @@ if __name__ == "__main__":
 
     ok_stg_aug = tls.search(state='OK', time=bymonth('AUGUST'), magnitude=lambda m: m >= 2)
     ok_stg_aug.list()
+    print ok_stg_aug.days().keys()
