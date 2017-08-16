@@ -14,6 +14,23 @@ class Searchable(object):
     def __len__(self):
         return len(self._lst)
 
+    def __getitem__(self, key):
+        try:
+            item = self._lst[key]
+        except TypeError:
+            item = [ it[key] for it in self._lst ]
+        return item
+
+def _to_set(val):
+    if isinstance(val, str):
+        val = [val]
+
+    try:
+        sval = set(val)
+    except TypeError:
+        sval = set([val])
+    return sval
+
 class SearchableItem(object):
     def matches(self, **kwargs):
         is_match = True
@@ -28,15 +45,10 @@ class SearchableItem(object):
                     is_match &= val(this_val)
             except TypeError:
                 # Try for other-type items
-                if isinstance(val, str):
-                    val = [val]
+                val = _to_set(val)
+                this_val = _to_set(this_val)
 
-                try:
-                    sval = set(val)
-                except TypeError:
-                    sval = set([val])
-
-                common = list(sval & set(this_val))
+                common = list(val & this_val)
                 is_match &= (len(common) > 0)
 
             if not is_match:
