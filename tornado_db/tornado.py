@@ -2,7 +2,8 @@
 from datetime import datetime, timedelta
 import ast
 from collections import defaultdict
-from searchable import SearchableItem
+
+from .searchable import SearchableItem
 
 class TornadoSegment(object):
     aliases = {

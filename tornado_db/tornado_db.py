@@ -3,13 +3,13 @@ import pandas as pd
 
 import sys
 from datetime import datetime, timedelta
-from itertools import izip
 from collections import OrderedDict, defaultdict
-from urllib2 import urlopen
 
-class MultiValueColumn(object):
-    def __init__(self):
-        pass
+try:
+    from urllib.request import urlopen
+except ImportError:
+    from urllib2 import urlopen
+
 
 class TornadoDB(object):
     def_col_names = [
@@ -37,10 +37,10 @@ class TornadoDB(object):
     @classmethod
     def from_file_obj(cls, fobj):
         db = pd.read_csv(fobj, header=0, names=TornadoDB.def_col_names, index_col=False)
-        dts = [datetime.strptime("%s %s" % (d, t), "%Y-%m-%d %H:%M:%S") for d, t in izip(db['date'], db['time'])]
+        dts = [datetime.strptime("%s %s" % (d, t), "%Y-%m-%d %H:%M:%S") for d, t in zip(db['date'], db['time'])]
         tds = [timedelta(hours=0) if tz == 9 else timedelta(hours=6) for tz in db['time_zone']]
 
-        dt = pd.to_datetime(pd.Series([dt + td for dt, td in izip(dts, tds)], index=db.index))
+        dt = pd.to_datetime(pd.Series([dt + td for dt, td in zip(dts, tds)], index=db.index))
 
         del db['date'], db['time'], db['time_zone'], db['year'], db['month'], db['day']
 
@@ -94,7 +94,7 @@ class TornadoDB(object):
                 db_col = new_db[col]
             return db_col
 
-        for col, val in kwargs.iteritems():
+        for col, val in kwargs.items():
             db_col = get_col(new_db, col)
             try:
                 # Try for function-type items
@@ -118,10 +118,10 @@ class TornadoDB(object):
 
     def days(self):
         tor_days = defaultdict(type(self._db))
-        for day, df in pd.groupby(self._db, by=[self._db.index.year, 
-                                                self._db.index.month, 
-                                                self._db.index.day, 
-                                                self._db.index.hour]):
+        for day, df in self._db.groupby(by=[self._db.index.year, 
+                                            self._db.index.month, 
+                                            self._db.index.day, 
+                                            self._db.index.hour]):
             dt = datetime.strptime("%04d%02d%02d%02d" % day, "%Y%m%d%H")
             if dt.hour < 12:
                 dt -= timedelta(days=1)
@@ -141,7 +141,7 @@ class TornadoDB(object):
 
     def list(self, fobj=sys.stdout):
         fobj.write("\n--------Time------- -State- -F-scale-\n")
-        for time, state, f_scale in izip(self._db.index, self._db['state'], self._db['f_scale']):
+        for time, state, f_scale in zip(self._db.index, self._db['state'], self._db['f_scale']):
             fs = "EF%d" % f_scale if time > datetime(2007, 2, 1, 0, 0, 0) else "F%d" % f_scale
             fobj.write("%s %7s %9s\n" % (time, state, fs))
 
@@ -194,7 +194,7 @@ class TornadoDB(object):
         cday_ends = [ d + timedelta(days=1) for d in cday_starts ]
 
         def get_vals(times):
-            return [ any(cds <= t < cde for cds, cde in izip(cday_starts, cday_ends)) for t in times ]
+            return [ any(cds <= t < cde for cds, cde in zip(cday_starts, cday_ends)) for t in times ]
         return get_vals
 
     @staticmethod
@@ -206,10 +206,10 @@ class TornadoDB(object):
 if __name__ == "__main__":
     db = TornadoDB.from_csv(path="/data/tornadoes.csv")
 #   db.to_csv("/data/tornadoes_2016.csv")
-    print "There are %d tornadoes in the database" % db.count()
+    print("There are %d tornadoes in the database" % db.count())
 
-#   ok_nov = db.search(state='OK', time=TornadoDB.bymonth(11), f_scale=lambda f: f >= 2)
-#   ok_nov.list()
+    ok_nov = db.search(state='OK', time=TornadoDB.bymonth(11), f_scale=lambda f: f >= 2)
+    ok_nov.list()
 
 #   print "November strong-violent tornado days in Oklahoma:"
 #   for day, tors in ok_nov.days().iteritems():

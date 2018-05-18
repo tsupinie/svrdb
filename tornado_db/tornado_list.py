@@ -1,6 +1,6 @@
 
-from tornado import TornadoFactory
-from searchable import Searchable
+from .tornado import TornadoFactory
+from .searchable import Searchable
 
 import sys
 from math import log10
@@ -10,11 +10,11 @@ from collections import OrderedDict, defaultdict
 class TornadoList(Searchable):
     @classmethod
     def from_csv(cls, fname):
-        return cls.from_fobj(open(fname))
+        return cls.from_fobj(open(fname, 'rb'))
 
     @classmethod
     def from_fobj(cls, fobj):
-        return cls.from_txt(fobj.read())
+        return cls.from_txt(fobj.read().decode('utf-8'))
 
     @classmethod
     def from_txt(cls, txt):
@@ -99,7 +99,7 @@ def bycday(*days):
     cday_ends = [ d + timedelta(days=1) for d in cday_starts ]
 
     def get_vals(time):
-        return any(cds <= time < cde for cds, cde in izip(cday_starts, cday_ends))
+        return any(cds <= time < cde for cds, cde in zip(cday_starts, cday_ends))
     return get_vals
 
 
