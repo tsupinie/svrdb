@@ -1,5 +1,5 @@
 
-from .tornado import TornadoFactory
+from .svrfactory import TornadoFactory
 from .searchable import Searchable
 
 import sys
