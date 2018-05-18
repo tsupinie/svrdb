@@ -230,6 +230,12 @@ class TornadoDB(object):
         return get_vals
 
     @staticmethod
+    def bycdate(*dates):
+        def get_vals(times):
+            return [ (t - timedelta(hours=12)).day in dates for t in times ]
+        return get_vals
+
+    @staticmethod
     def bycday(*days):
         cday_starts = [ d.replace(hour=12, minute=0, second=0, microsecond=0) for d in days ]
         cday_ends = [ d + timedelta(days=1) for d in cday_starts ]
