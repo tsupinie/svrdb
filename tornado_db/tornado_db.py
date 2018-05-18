@@ -74,7 +74,7 @@ class TornadoDB(object):
 
     @classmethod
     def from_web(cls):
-        url = "http://www.spc.noaa.gov/wcm/data/1950-2016_actual_tornadoes.csv"
+        url = "http://www.spc.noaa.gov/wcm/data/1950-2017_actual_tornadoes_prelim.csv"
         return cls.from_file_obj(urlopen(url))
 
     @classmethod
