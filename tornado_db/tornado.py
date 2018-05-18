@@ -48,7 +48,7 @@ class TornadoSegment(object):
 
             del kwargs[attr]
 
-        kwargs['time'] = tor_dt
+        kwargs['datetime'] = tor_dt
         kwargs['cty_fips'] = cty_fips
 
         self._attrs = kwargs
@@ -140,9 +140,9 @@ class Tornado(SearchableItem):
         self._segs = segments
 
     def __str__(self):
-        time_str = self['time'].strftime("%Y-%m-%d %H:%M")
+        time_str = self['datetime'].strftime("%Y-%m-%d %H:%M")
         states = ", ".join(self['st'])
-        mag = "EF%d" % self['mag'] if self['time'] >= datetime(2007, 2, 1, 0) else "F%d" % self['mag']
+        mag = "EF%d" % self['mag'] if self['datetime'] >= datetime(2007, 2, 1, 0) else "F%d" % self['mag']
         return "%16s %11s %5s" % (time_str, states, mag)
 
     @classmethod
@@ -223,7 +223,7 @@ class Tornado(SearchableItem):
             result = max(attr_list)
         elif db_attr in [ 'len', 'fat', 'inj' ]:
             result = sum(attr_list)
-        elif db_attr in [ 'time', 'slat', 'slon' ]:
+        elif db_attr in [ 'datetime', 'slat', 'slon' ]:
             result = attr_list[0]
         elif db_attr in [ 'elat', 'elon' ]:
             result = attr_list[-1]
@@ -259,7 +259,7 @@ class TornadoFactory(object):
             line_dict = dict((c, parse(v)) for c, v in zip(self._cols, line.split(",")))
             seg = TornadoSegment(**line_dict)
             om = seg['om']
-            yr = seg['time'].year
+            yr = seg['datetime'].year
 
             if self._year is not None and yr != self._year:
                 results = self.flush()

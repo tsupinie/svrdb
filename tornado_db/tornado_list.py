@@ -61,7 +61,7 @@ class TornadoList(Searchable):
     def days(self):
         tor_days = defaultdict(list)
         for tor in self:
-            tor_day = (tor['time'] - timedelta(hours=12)).replace(hour=12, minute=0, second=0, microsecond=0)
+            tor_day = (tor['datetime'] - timedelta(hours=12)).replace(hour=12, minute=0, second=0, microsecond=0)
             tor_days[tor_day].append(tor)
 
         return OrderedDict((tor_day, type(self)(tor_days[tor_day])) for tor_day in sorted(tor_days.keys()))
@@ -112,8 +112,10 @@ def byhour(*hours):
 if __name__ == "__main__":
     tls = TornadoList.from_csv('/data/All_tornadoes.csv')
 
-    ok_stg_aug = tls.search(state='OK', time=bymonth('AUGUST'), magnitude=lambda m: m >= 2)
+#   ok_stg_aug = tls.search(state='OK', datetime=bymonth('AUGUST'), magnitude=lambda m: m >= 2)
 #   print(ok_stg_aug)
-    print ok_stg_aug.days().keys()
+#   print(ok_stg_aug.days().keys())
+
+    print(tls.search(datetime=bycday(datetime(1991, 4, 26))))
 
 #   tls.to_csv("/data/All_tornadoes_out.csv")
