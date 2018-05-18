@@ -67,49 +67,8 @@ class TornadoList(Searchable):
         return OrderedDict((tor_day, type(self)(tor_days[tor_day])) for tor_day in sorted(tor_days.keys()))
 
 
-def byyear(*years):
-    def get_vals(time):
-        return (time - timedelta(hours=12)).year in years
-    return get_vals
-
-
-def bymonth(*months):
-    month_names = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december']
-    month_abrvs = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
-
-    def try_strings(mo):
-        try:
-            mo_num = month_names.index(mo.lower()) + 1
-        except (ValueError, AttributeError):
-            try:
-                mo_num = month_abrvs.index(mo.lower()) + 1
-            except (ValueError, AttributeError):
-                mo_num = mo
-        return mo_num
-
-    month_nums = [ try_strings(mo) for mo in months ]
-
-    def get_vals(time):
-        return (time - timedelta(hours=12)).month in month_nums
-    return get_vals
-
-
-def bycday(*days):
-    cday_starts = [ d.replace(hour=12, minute=0, second=0, microsecond=0) for d in days ]
-    cday_ends = [ d + timedelta(days=1) for d in cday_starts ]
-
-    def get_vals(time):
-        return any(cds <= time < cde for cds, cde in zip(cday_starts, cday_ends))
-    return get_vals
-
-
-def byhour(*hours):
-    def get_vals(time):
-        return time.hour in hours
-    return get_vals
-
-
 if __name__ == "__main__":
+    from searchable import bymonth, bycday
     tls = TornadoList.from_csv('/data/All_tornadoes.csv')
 
 #   ok_stg_aug = tls.search(state='OK', datetime=bymonth('AUGUST'), magnitude=lambda m: m >= 2)
