@@ -65,16 +65,3 @@ class TornadoList(Searchable):
             tor_days[tor_day].append(tor)
 
         return OrderedDict((tor_day, type(self)(tor_days[tor_day])) for tor_day in sorted(tor_days.keys()))
-
-
-if __name__ == "__main__":
-    from searchable import bymonth, bycday
-    tls = TornadoList.from_csv('/data/All_tornadoes.csv')
-
-#   ok_stg_aug = tls.search(state='OK', datetime=bymonth('AUGUST'), magnitude=lambda m: m >= 2)
-#   print(ok_stg_aug)
-#   print(ok_stg_aug.days().keys())
-
-    print(tls.search(datetime=bycday(datetime(1991, 4, 26))))
-
-#   tls.to_csv("/data/All_tornadoes_out.csv")
