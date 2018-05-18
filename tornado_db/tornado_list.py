@@ -33,6 +33,15 @@ class TornadoList(Searchable):
 
         return cls(*tors)
 
+    def to_csv(self, fname):
+        with open(fname, 'w') as csvf:
+            first_pass = True
+            for tor in self:
+                entries = tor.to_csv(headers=first_pass)
+                csvf.write(entries)
+
+                first_pass = False
+
     def __str__(self):
         n_places = int(log10(len(self))) + 1
         num_str = "%%%dd" % n_places
@@ -106,3 +115,5 @@ if __name__ == "__main__":
     ok_stg_aug = tls.search(state='OK', time=bymonth('AUGUST'), magnitude=lambda m: m >= 2)
 #   print(ok_stg_aug)
     print ok_stg_aug.days().keys()
+
+#   tls.to_csv("/data/All_tornadoes_out.csv")
