@@ -33,20 +33,21 @@ class TornadoList(Searchable):
 
         return cls(*tors)
 
-    def list(self, stream=sys.stdout):
+    def __str__(self):
         n_places = int(log10(len(self))) + 1
         num_str = "%%%dd" % n_places
-        stream.write(" " * (n_places + 2))
-        stream.write("---Time-(UTC)--- ")
-        stream.write(" --States--")
-        stream.write(" -Mag-")
-        stream.write("\n")
+        torstr = ""
+        torstr += " " * (n_places + 2)
+        torstr += "---Time-(UTC)--- "
+        torstr += " --States--"
+        torstr += " -Mag-"
 
         for idx, tor in enumerate(self):
-            stream.write(num_str % (idx + 1))
-            stream.write(". ")
-            stream.write(str(tor))
-            stream.write("\n")
+            torstr += "\n"
+            torstr += str(num_str % (idx + 1))
+            torstr += ". "
+            torstr += str(tor)
+        return torstr
 
     def days(self):
         tor_days = defaultdict(list)
@@ -103,5 +104,5 @@ if __name__ == "__main__":
     tls = TornadoList.from_csv('/data/All_tornadoes.csv')
 
     ok_stg_aug = tls.search(state='OK', time=bymonth('AUGUST'), magnitude=lambda m: m >= 2)
-    ok_stg_aug.list()
+#   print(ok_stg_aug)
     print ok_stg_aug.days().keys()
