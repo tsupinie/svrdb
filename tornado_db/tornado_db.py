@@ -12,6 +12,49 @@ except ImportError:
 
 
 class TornadoDB(object):
+    """
+    TornadoDB
+    Class for reading the OneTor (a.k.a. actual_tornadoes) database from SPC.
+
+    Author: Tim Supinie (tsupinie@ou.edu)
+    
+    Examples:
+    >>> db = TornadoDB.from_web() # Download from the web
+    >>> db = TornadoDB.from_csv('/path/to/local/database.csv') # Open a local CSV
+    >>> tornado_times = db['time'] # Pull out the datetimes for all tornadoes in the database object
+    >>> ok_spring = db.search(state='OK',                                # Search by state (return tornadoes in Oklahoma) 
+    ...                       time=TornadoDB.bymonth('March', 'Apr', 5), # Search by month (return tornadoes in March, April, or May)
+    ...                       f_scale=lambda f: f >= 2)                  # Search by (E)F rating (lambda function returns tornadoes (E)F2 or stronger)
+    >>> ok_spring.list() # Print out a list of strong tornadoes in OK in the spring.
+
+    In the above example, ok_spring is another database object, so anything
+    you can do to the full database, you can do to ok_spring, and vice-versa.
+
+    Commonly-used attributes:
+    'state' (state that the tornado touched down in, which is not necessarily all the states the tornado touched)
+    'time' (date/time of the tornado start)
+    'length' (path length in miles), 
+    'width' (mean or max path width in yards)
+    'f_scale' (F- or EF-scale rating)
+    'start_lat', 'start_lon' (starting latitude and longitude)
+    'end_lat', 'end_lon' (ending latitude and longitude; might be (0, 0) for brief touchdowns).
+    
+    Any of the above can be pulled directly out of a database object by 
+    treating it like a dictionary (e.g. db['time'], db['width']).
+
+    Any of the above can also be used as a key in search() to search the 
+    database. The values in search() can be either a string/integer/float (for 
+    example, state='OK' or f_scale=2), or a list of strings/integers/floats 
+    (for example state=['OK', 'KS'] or f_scale=[4, 5]) or a function (perhaps 
+    length=lambda l: l >= 10 to return tornadoes with path lengths greater than
+    10 miles). 
+
+    The 'time' attribute has some special helper functions to search over 
+    different periods of time: TornadoDB.byyear(), TornadoDB.bymonth(), 
+    TornadoDB.bycday() (convective day), and TornadoDB.byhour() (hour of day).
+    Each of these takes one or more values.
+    """
+
     def_col_names = [
         u'om_number', u'year', u'month', u'day', u'date', u'time', u'time_zone', 
         u'state', u'state_fips', u'state_seq', 
@@ -45,16 +88,16 @@ class TornadoDB(object):
         del db['date'], db['time'], db['time_zone'], db['year'], db['month'], db['day']
 
         db['time'] = dt
-        n_states_max = db['num_states'].max()
+#       n_states_max = db['num_states'].max()
 
-        def _remove_dups(df):
-            return df
+#       def _remove_dups(df):
+#           return df
 
-        db_years = []
-        for year, df in pd.groupby(db, by=db.time.dt.year):
-            db_years.append(_remove_dups(df))
+#       db_years = []
+#       for year, df in db.groupby(by=db.time.dt.year):
+#           db_years.append(_remove_dups(df))
 
-        db = pd.concat(db_years)
+#       db = pd.concat(db_years)
         db.set_index('time', inplace=True)
 
         db_start = db.iloc[0].name.to_pydatetime().replace(month=1, day=1, hour=0, minute=0)
@@ -71,8 +114,6 @@ class TornadoDB(object):
             'om', 'yr', 'mo', 'dy', 'date', 'time', 'tz', 'st', 'stf', 'stn', 'mag', 'inj', 'fat', 'loss', 'closs', 
             'slat', 'slon', 'elat', 'elon', 'len', 'wid', 'ns', 'sn', 'sg', 'f1', 'f2', 'f3', 'f4', 'fc'
         ]
-        db = self._db.copy()
-
         db['date'] = [ dt.strftime("%Y-%m-%d") for dt in db.index ]
         db['year'] = [ dt.year for dt in db.index ]
         db['month'] = [ dt.month for dt in db.index ]
