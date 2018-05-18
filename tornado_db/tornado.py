@@ -1,6 +1,5 @@
 
 from datetime import datetime, timedelta
-import ast
 from collections import defaultdict
 
 from .searchable import SearchableItem
@@ -33,7 +32,11 @@ class TornadoSegment(object):
     }
 
     def __init__(self, **kwargs):
-        tor_dt = datetime.strptime("%s %s" % (kwargs['date'], kwargs['time']), "%Y-%m-%d %H:%M:%S")
+        # strptime() is too slow, so parse the date and time manually
+        yr, mo, dy = kwargs['date'].split('-')
+        hr, mn, sc = kwargs['time'].split(':')
+        tor_dt = datetime(int(yr), int(mo), int(dy), int(hr), int(mn), int(sc))
+
         tz_offset = timedelta(hours=6) if kwargs['tz'] == 3 else timedelta(hours=0)
         tor_dt += tz_offset
 
@@ -52,7 +55,18 @@ class TornadoSegment(object):
         kwargs['cty_fips'] = cty_fips
 
         self._attrs = kwargs
-        self._patch()
+
+        # Patch some goofs I noticed in the database
+        yr = int(yr)
+        if yr == 1953 and self['om'] == 265 and self['st'] == 'IA':
+            self._attrs['om'] = 263
+        if yr == 1961 and self['om'] == 456 and self['st'] == 'SD':
+            self._attrs['om'] = 454
+        if yr == 1995 and self['om'] == 9999 and self['st'] == 'IA':
+            self._attrs['om'] = 9998
+        if yr == 2015 and self['om'] == 576455 and self['st'] == 'NE':
+            self._attrs['om'] = 576454
+
 
     def merge(self, other):
         # This fails for tornadoes that leave and then re-enter a state (for example, see OM#480993, 2013-11-17)
@@ -123,17 +137,6 @@ class TornadoSegment(object):
     def __repr__(self):
         return repr(self._attrs)
 
-    def _patch(self):
-        # Patch some goofs I noticed in the database
-        if self['time'].year == 1953 and self['om'] == 265 and self['st'] == 'IA':
-            self._attrs['om'] = 263
-        if self['time'].year == 1961 and self['om'] == 456 and self['st'] == 'SD':
-            self._attrs['om'] = 454
-        if self['time'].year == 1995 and self['om'] == 9999 and self['st'] == 'IA':
-            self._attrs['om'] = 9998
-        if self['time'].year == 2015 and self['om'] == 576455 and self['st'] == 'NE':
-            self._attrs['om'] = 576454
-
 
 class Tornado(SearchableItem):
     def __init__(self, segments):
@@ -147,6 +150,9 @@ class Tornado(SearchableItem):
 
     @classmethod
     def from_segments(cls, segments):
+        if len(segments) == 1:
+            return cls(segments)
+
         segments_st = defaultdict(list)
         for seg in segments:
             segments_st[seg['st']].append(seg)
@@ -238,43 +244,33 @@ class Tornado(SearchableItem):
 
 
 class TornadoFactory(object):
-    def __init__(self):
+    def __init__(self, cols):
         self._year = None
-        self._cols = None
+        self._cols = cols
         self._segments = defaultdict(list)
 
     def consume(self, line):
-        def parse(val):
-            try:
-                pval = ast.literal_eval(val)
-            except (ValueError, SyntaxError):
-                pval = val
-            return pval
-
         results = []
 
-        if self._cols is None:
-            self._cols = line.split(",")
-        else:
-            line_dict = dict((c, parse(v)) for c, v in zip(self._cols, line.split(",")))
+        line_dict = dict((c, TornadoSegment.parsers[c](v)) for c, v in zip(self._cols, line.split(',')))
+        seg = TornadoSegment(**line_dict)
+        om = seg['om']
+        yr = seg['datetime'].year
+
+        if self._year is not None and yr != self._year:
+            results = self.flush()
+
+        self._segments[om].append(seg)
+        if yr == 1993 and om == 74:
+            line_dict.update({'st':'NE', 'stf':31, 'f1':65, 'stn':1, 'elat':40.02, 'elon':-99.92})
             seg = TornadoSegment(**line_dict)
-            om = seg['om']
-            yr = seg['datetime'].year
-
-            if self._year is not None and yr != self._year:
-                results = self.flush()
-
             self._segments[om].append(seg)
-            if yr == 1993 and om == 74:
-                line_dict.update({'st':'NE', 'stf':31, 'f1':65, 'stn':1, 'elat':40.02, 'elon':-99.92})
-                seg = TornadoSegment(**line_dict)
-                self._segments[om].append(seg)
-            if yr == 2006 and om == 80 and seg['sg'] == 1:
-                line_dict.update({'st':'IL', 'stf':17, 'f1':157, 'f2':145, 'stn':5, 'slat':37.78, 'slon':-90.05})
-                seg = TornadoSegment(**line_dict)
-                self._segments[om].append(seg)
+        if yr == 2006 and om == 80 and seg['sg'] == 1:
+            line_dict.update({'st':'IL', 'stf':17, 'f1':157, 'f2':145, 'stn':5, 'slat':37.78, 'slon':-90.05})
+            seg = TornadoSegment(**line_dict)
+            self._segments[om].append(seg)
 
-            self._year = yr
+        self._year = yr
         return results
 
     def flush(self):

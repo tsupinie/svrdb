@@ -20,10 +20,10 @@ class TornadoList(Searchable):
     def from_txt(cls, txt):
         lines = txt.split("\r\n")
 
-        factory = TornadoFactory()
+        factory = TornadoFactory(lines[0].split(','))
         tors = []
 
-        for line in lines:
+        for line in lines[1:]:
             if line == "":
                 continue
 
