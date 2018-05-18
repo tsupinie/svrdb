@@ -72,9 +72,9 @@ class TornadoSegment(object):
         # This fails for tornadoes that leave and then re-enter a state (for example, see OM#480993, 2013-11-17)
         if self['ns'] == 1:
             if self['sn'] == 1:
-                merge_sg = other
-            else:
                 merge_sg = self
+            else:
+                merge_sg = other
         else:
             if other['sn'] == 1:
                 merge_sg = other
