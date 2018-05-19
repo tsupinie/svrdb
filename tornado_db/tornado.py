@@ -4,6 +4,8 @@ from collections import defaultdict
 
 from .searchable import SearchableItem
 
+_epoch = datetime(1970, 1, 1, 0)
+
 class TornadoSegment(object):
     aliases = {
         'state':'st',
@@ -24,40 +26,29 @@ class TornadoSegment(object):
             "slat", "slon", "elat", "elon", "len", "wid", 
             "ns", "sn", "sg", "f1", "f2", "f3", "f4", "fc"]
 
-    parsers = {
-        'om': int, 'yr': int, 'mo': int, 'dy': int, 'date': str, 'time': str, 'tz': int,
-        'st': str, 'stf': int, 'stn': int, 'mag': int, 'inj': int, 'fat': int, 'loss': float, 'closs': float,
-        'slat': float, 'slon': float, 'elat': float, 'elon': float, 'len': float, 'wid': int,
-        'ns': int, 'sn': int, 'sg': int, 'f1': int, 'f2': int, 'f3': int, 'f4': int, 'fc': int,
-    }
-
     def __init__(self, **kwargs):
-        # strptime() is too slow, so parse the date and time manually
-        yr, mo, dy = kwargs['date'].split('-')
-        hr, mn, sc = kwargs['time'].split(':')
-        tor_dt = datetime(int(yr), int(mo), int(dy), int(hr), int(mn), int(sc))
-
-        tz_offset = timedelta(hours=6) if kwargs['tz'] == 3 else timedelta(hours=0)
-        tor_dt += tz_offset
-
-        for attr in ['date', 'time', 'yr', 'mo', 'dy', 'tz']:
-            del kwargs[attr]
+        try:
+            kwargs['datetime'] = _epoch + timedelta(seconds=kwargs['datetime'])
+        except TypeError:
+            pass
 
         cty_fips = []
         for attr in ['f1', 'f2', 'f3', 'f4']:
+            if attr not in kwargs:
+                continue
+
             if kwargs[attr] != 0:
                 cty_st_fips = kwargs['stf'] * 1000 + kwargs[attr]
                 cty_fips.append(cty_st_fips)
 
             del kwargs[attr]
 
-        kwargs['datetime'] = tor_dt
         kwargs['cty_fips'] = cty_fips
 
         self._attrs = kwargs
 
         # Patch some goofs I noticed in the database
-        yr = int(yr)
+        yr = kwargs['datetime'].year
         if yr == 1953 and self['om'] == 265 and self['st'] == 'IA':
             self._attrs['om'] = 263
         if yr == 1961 and self['om'] == 456 and self['st'] == 'SD':
@@ -136,6 +127,10 @@ class TornadoSegment(object):
 
     def __repr__(self):
         return repr(self._attrs)
+
+    def __iter__(self):
+        for k, v in self._attrs.items():
+            yield k, v
 
 
 class Tornado(SearchableItem):

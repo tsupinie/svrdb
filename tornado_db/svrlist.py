@@ -1,11 +1,14 @@
 
-from .svrfactory import TornadoFactory
+from .parsers import TornadoUnpacker
 from .searchable import Searchable
+
+import pandas as pd
 
 import sys
 from math import log10
 from datetime import datetime, timedelta
 from collections import OrderedDict, defaultdict
+from io import StringIO
 
 class SVRList(Searchable):
     @classmethod
@@ -18,18 +21,12 @@ class SVRList(Searchable):
 
     @classmethod
     def from_txt(cls, txt):
-        lines = txt.split("\r\n")
+        sio = StringIO(txt)
+        df = pd.read_csv(sio, index_col=False)
 
-        factory = cls.factory(lines[0].split(','))
-        svrs = []
-
-        for line in lines[1:]:
-            if line == "":
-                continue
-
-            svrs.extend(factory.consume(line))
-
-        svrs.extend(factory.flush())
+        unpacker = cls.unpacker()
+        reports = unpacker.parse(df)
+        svrs = unpacker.merge(reports)
 
         return cls(*svrs)
 
@@ -42,9 +39,9 @@ class SVRList(Searchable):
 
                 first_pass = False
 
-    def __init_subclass__(cls, factory):
+    def __init_subclass__(cls, unpacker):
         super().__init_subclass__()
-        cls.factory = factory
+        cls.unpacker = unpacker
 
     def __str__(self):
         n_places = int(log10(len(self))) + 1
@@ -71,5 +68,5 @@ class SVRList(Searchable):
         return OrderedDict((svr_day, type(self)(svr_days[svr_day])) for svr_day in sorted(svr_days.keys()))
 
 
-class TornadoList(SVRList, factory=TornadoFactory):
+class TornadoList(SVRList, unpacker=TornadoUnpacker):
     pass
