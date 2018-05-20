@@ -1,5 +1,5 @@
 
-from .parsers import TornadoUnpacker
+from .parsers import TornadoUnpacker, WindUnpacker
 from .searchable import Searchable
 
 import pandas as pd
@@ -22,7 +22,7 @@ class SVRList(Searchable):
     @classmethod
     def from_txt(cls, txt):
         sio = StringIO(txt)
-        df = pd.read_csv(sio, index_col=False)
+        df = pd.read_csv(sio, index_col=False, dtype={'mt': str})
 
         unpacker = cls.unpacker()
         reports = unpacker.parse(df)
@@ -69,4 +69,7 @@ class SVRList(Searchable):
 
 
 class TornadoList(SVRList, unpacker=TornadoUnpacker):
+    pass
+
+class WindList(SVRList, unpacker=WindUnpacker):
     pass

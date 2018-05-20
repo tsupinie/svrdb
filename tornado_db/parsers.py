@@ -1,5 +1,6 @@
 
 from .tornado import TornadoSegment, Tornado
+from .wind import Wind
 
 import pandas as pd
 
@@ -56,3 +57,9 @@ class TornadoUnpacker(ReportUnpacker, report_primitive=TornadoSegment):
 
         tors = [ Tornado.from_segments(segs) for segs in segs_om.values() ]
         return tors
+
+class WindUnpacker(ReportUnpacker, report_primitive=Wind):
+    def parse(self, df):
+        del df['elat'], df['elon'], df['len'], df['wid'], df['ns'], df['sn'], df['sg'], df['f2'], df['f3'], df['f4']
+
+        return super(WindUnpacker, self).parse(df)
