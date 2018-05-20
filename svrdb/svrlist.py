@@ -1,5 +1,5 @@
 
-from .parsers import TornadoUnpacker, WindUnpacker
+from .parsers import TornadoUnpacker, WindUnpacker, HailUnpacker
 from .searchable import Searchable
 
 import pandas as pd
@@ -79,4 +79,7 @@ class TornadoList(SVRList, unpacker=TornadoUnpacker):
     pass
 
 class WindList(SVRList, unpacker=WindUnpacker):
+    pass
+
+class HailList(SVRList, unpacker=HailUnpacker):
     pass

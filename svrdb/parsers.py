@@ -1,6 +1,7 @@
 
 from .tornado import TornadoSegment, Tornado
 from .wind import Wind
+from .hail import Hail
 
 import pandas as pd
 
@@ -63,3 +64,9 @@ class WindUnpacker(ReportUnpacker, report_primitive=Wind):
         del df['elat'], df['elon'], df['len'], df['wid'], df['ns'], df['sn'], df['sg'], df['f2'], df['f3'], df['f4']
 
         return super(WindUnpacker, self).parse(df)
+
+class HailUnpacker(ReportUnpacker, report_primitive=Hail):
+    def parse(self, df):
+        del df['elat'], df['elon'], df['len'], df['wid'], df['ns'], df['sn'], df['sg'], df['f2'], df['f3'], df['f4']
+
+        return super(HailUnpacker, self).parse(df)
