@@ -44,7 +44,10 @@ class SVRList(Searchable):
         cls.unpacker = unpacker
 
     def __str__(self):
-        n_places = int(log10(len(self))) + 1
+        if len(self) > 0:
+            n_places = int(log10(len(self))) + 1
+        else:
+            n_places = 1
         num_str = "%%%dd" % n_places
         svrstr = ""
         svrstr += " " * (n_places + 2)
@@ -57,6 +60,10 @@ class SVRList(Searchable):
             svrstr += str(num_str % (idx + 1))
             svrstr += ". "
             svrstr += str(svr)
+
+        if len(self) == 0:
+            svrstr += "\n   [              None              ]"
+
         return svrstr
 
     def days(self):
