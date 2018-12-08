@@ -1,13 +1,14 @@
 
 from .parsers import TornadoUnpacker, WindUnpacker, HailUnpacker
 from .searchable import Searchable
+from .plotters import plot_tornadoes, plot_wind, plot_hail
 
 import pandas as pd
 
 import sys
 from math import log10
 from datetime import datetime, timedelta
-from collections import OrderedDict, defaultdict
+from collections import defaultdict
 from io import StringIO
 
 class SVRList(Searchable):
@@ -66,13 +67,30 @@ class SVRList(Searchable):
 
         return svrstr
 
+    def groupby(self, group):
+        if '.' in group:
+            group, attr = group.split('.', 1)
+        else:
+            attr = None
+
+        keys = [svr[group] for svr in self]
+
+        if attr is not None:
+            keys = [getattr(key, attr) for key in keys]
+
+        groups = defaultdict(list)
+        for key, svr in zip(keys, self):
+            groups[key].append(svr)
+
+        return dict((key, type(self)(*grp)) for key, grp in groups.items())
+
     def days(self):
         svr_days = defaultdict(list)
         for svr in self:
             svr_day = (svr['datetime'] - timedelta(hours=12)).replace(hour=12, minute=0, second=0, microsecond=0)
             svr_days[svr_day].append(svr)
 
-        return OrderedDict((svr_day, type(self)(svr_days[svr_day])) for svr_day in sorted(svr_days.keys()))
+        return dict((svr_day, type(self)(*svr_days[svr_day])) for svr_day in sorted(svr_days.keys()))
 
 
 class TornadoList(SVRList, unpacker=TornadoUnpacker):
