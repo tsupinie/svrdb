@@ -42,6 +42,7 @@ class Wind(SearchableItem):
         if self['mag'] == 0:
             mag = '--'
         else:
-            mag = "%s%d" % (self['mt'][0], self['mag'])
+            acc = self['mt'][0] if type(self['mt']) != float else ''
+            mag = "%s%d" % (acc, self['mag'])
 
         return "%16s %11s %5s" % (time_str, states, mag)

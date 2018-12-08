@@ -33,6 +33,11 @@ class TornadoSegment(object):
         except TypeError:
             pass
 
+        if kwargs['elat'] < 10:
+            kwargs['elat'] = kwargs['slat']
+        if kwargs['elon'] > -10:
+            kwargs['elon'] = kwargs['slon']
+
         cty_fips = []
         for attr in ['f1', 'f2', 'f3', 'f4']:
             if attr not in kwargs:

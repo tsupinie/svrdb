@@ -40,9 +40,10 @@ class SVRList(Searchable):
 
                 first_pass = False
 
-    def __init_subclass__(cls, unpacker):
+    def __init_subclass__(cls, unpacker, plotter):
         super().__init_subclass__()
         cls.unpacker = unpacker
+        cls.plotter = plotter
 
     def __str__(self):
         if len(self) > 0:
@@ -92,12 +93,14 @@ class SVRList(Searchable):
 
         return dict((svr_day, type(self)(*svr_days[svr_day])) for svr_day in sorted(svr_days.keys()))
 
+    def plot(self, label=None, filename=None):
+        type(self).plotter(self, label=label, filename=filename)
 
-class TornadoList(SVRList, unpacker=TornadoUnpacker):
+class TornadoList(SVRList, unpacker=TornadoUnpacker, plotter=plot_tornadoes):
     pass
 
-class WindList(SVRList, unpacker=WindUnpacker):
+class WindList(SVRList, unpacker=WindUnpacker, plotter=plot_wind):
     pass
 
-class HailList(SVRList, unpacker=HailUnpacker):
+class HailList(SVRList, unpacker=HailUnpacker, plotter=plot_hail):
     pass
