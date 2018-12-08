@@ -1,5 +1,5 @@
 
-from searchable import Searchable, SearchableItem
+from .searchable import Searchable, SearchableItem
 
 import csv
 from collections import defaultdict
@@ -32,9 +32,12 @@ class FIPS(Searchable):
 
     def lookup_fips(self, fips_code):
         st_fips, cty_fips = divmod(fips_code, 1000)
+        print(fips_code)
         return self.search(state_fips=st_fips, county_fips=cty_fips)[0]
+
+fips = FIPS.from_file("/data/geo/us_cty_fips.txt")
 
 if __name__ == "__main__":
     f = FIPS.from_file("/data/geo/us_cty_fips.txt")
-    print f.lookup_name('Cleveland', 'OK')
-    print f.lookup_fips(40027)
+    print(f.lookup_name('Cleveland', 'OK'))
+    print(f.lookup_fips(40027))

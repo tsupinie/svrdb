@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from collections import defaultdict
 
 from .searchable import SearchableItem
+from .fips import fips
 
 _epoch = datetime(1970, 1, 1, 0)
 
@@ -47,12 +48,34 @@ class TornadoSegment(object):
 
         self._attrs = kwargs
 
+        def replace_fips(old, new):
+            cty_fips = self._attrs['cty_fips']
+            if old in cty_fips:
+                cty_fips[cty_fips.index(old)] = new
+                cty_fips = list(set(cty_fips))
+            self._attrs['cty_fips'] = cty_fips
+
+        replace_fips(46131, 46071) # Washabaugh County, SD merged with Jackson County, SD
+        replace_fips(12025, 12086) # Dade County, FL renamed Miami-Dade County, FL
+        replace_fips(13597, 13197) # Typo on the FIPS code for Marion County, GA?
+        replace_fips(51039, 51037) # Typo on the FIPS code for Charlotte County, VA?
+        replace_fips(27002, 27003) # Typo on the FIPS code for Anoka County, MN?
+        replace_fips(51123, 51800) # Suffolk City, VA replaced Nansemond County, VA
+        replace_fips(46001, 46003) # Typo on the FIPS code for Aurora County, SD?
+        replace_fips(29677, 29077) # Typo on the FIPS code for Greene County, MO?
+        replace_fips(21022, 21033) # Typo on the FIPS code for Caldwell County, KY?
+        replace_fips(42159, 42015) # Typo on the FIPS code for Bradford County, PA?
+
         # Patch some goofs I noticed in the database
         yr = kwargs['datetime'].year
         if yr == 1953 and self['om'] == 265 and self['st'] == 'IA':
             self._attrs['om'] = 263
         if yr == 1961 and self['om'] == 456 and self['st'] == 'SD':
             self._attrs['om'] = 454
+        if yr == 1966 and self['om'] == 13:
+            self._attrs['cty_fips'] = [51083]
+        if yr == 1966 and self['om'] == 14:
+            self._attrs['cty_fips'] = [51081]
         if yr == 1995 and self['om'] == 9999 and self['st'] == 'IA':
             self._attrs['om'] = 9998
         if yr == 2015 and self['om'] == 576455 and self['st'] == 'NE':
@@ -231,7 +254,11 @@ class Tornado(SearchableItem):
         elif db_attr in [ 'cty_fips' ]:
             result = [ c for lst in attr_list for c in lst ]
             if attr == 'counties':
-                pass
+                def lookup_fips(cty):
+                    fips_entry = fips.lookup_fips(cty)
+                    return fips_entry['county'], fips_entry['state']
+
+                result = [ lookup_fips(c) for c in result ]
         else:
             result = attr_list
 
