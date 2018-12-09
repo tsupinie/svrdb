@@ -6,12 +6,18 @@ from .plotters import plot_tornadoes, plot_wind, plot_hail
 import pandas as pd
 
 import sys
+import os
 from math import log10
 from datetime import datetime, timedelta
 from collections import defaultdict
 from io import StringIO
 
 class SVRList(Searchable):
+    @classmethod
+    def load_db(cls):
+        fname = os.path.join(os.path.dirname(__file__), 'data', cls.db_fname)
+        return cls.from_csv(fname)
+
     @classmethod
     def from_csv(cls, fname):
         return cls.from_fobj(open(fname, 'rb'))
@@ -40,10 +46,11 @@ class SVRList(Searchable):
 
                 first_pass = False
 
-    def __init_subclass__(cls, unpacker, plotter):
+    def __init_subclass__(cls, unpacker, plotter, db_fname):
         super().__init_subclass__()
         cls.unpacker = unpacker
         cls.plotter = plotter
+        cls.db_fname = db_fname
 
     def __str__(self):
         if len(self) > 0:
@@ -125,11 +132,20 @@ class SVRList(Searchable):
     def plot(self, label=None, filename=None):
         type(self).plotter(self, label=label, filename=filename)
 
-class TornadoList(SVRList, unpacker=TornadoUnpacker, plotter=plot_tornadoes):
+
+class TornadoList(SVRList, unpacker=TornadoUnpacker, 
+                           plotter=plot_tornadoes,
+                           db_fname='1950-2017_all_tornadoes.csv'):
     pass
 
-class WindList(SVRList, unpacker=WindUnpacker, plotter=plot_wind):
+
+class WindList(SVRList, unpacker=WindUnpacker, 
+                        plotter=plot_wind,
+                        db_fname='1955-2017_wind.csv'):
     pass
 
-class HailList(SVRList, unpacker=HailUnpacker, plotter=plot_hail):
+
+class HailList(SVRList, unpacker=HailUnpacker, 
+                        plotter=plot_hail,
+                        db_fname='1955-2017_hail.csv'):
     pass
