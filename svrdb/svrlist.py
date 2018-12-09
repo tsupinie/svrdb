@@ -68,6 +68,35 @@ class SVRList(Searchable):
 
         return svrstr
 
+    def _repr_html_(self):
+        css = """
+        .svrlist {
+            font-size: 14px !important;
+        }
+        .svrlist td, th {
+            text-align: center !important;
+        }
+        .svrlist tr:nth-child(odd) {
+            background: #bbbbbb !important;
+        }
+        .svrlist tr:nth-child(even) {
+            background: #dddddd !important;
+        }
+        .svrlist td {
+            padding: 2px;
+        }
+        """
+
+        html_str = '<style>%s</style><table class="svrlist">' % css
+        html_str += '<tr><th>&nbsp;</th><th>Date/Time (UTC)</th><th>Magnitude</th></tr>'
+        for idx, svr in enumerate(self):
+            html_str += '<tr>'
+            html_str += '<td>%d.</td>' % (idx + 1)
+            html_str += svr._repr_html_(_make_table=False)
+            html_str += '</tr>'
+
+        return html_str + '</table>'
+
     def groupby(self, group):
         if '.' in group:
             group, attr = group.split('.', 1)

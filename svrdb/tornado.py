@@ -168,8 +168,21 @@ class Tornado(SearchableItem):
     def __str__(self):
         time_str = self['datetime'].strftime("%Y-%m-%d %H:%M")
         states = ", ".join(self['st'])
-        mag = "EF%d" % self['mag'] if self['datetime'] >= datetime(2007, 2, 1, 0) else "F%d" % self['mag']
+        mag = self._get_mag_str()
         return "%16s %11s %5s" % (time_str, states, mag)
+
+    def _repr_html_(self, _make_table=True):
+        html_str = ''
+        if _make_table:
+            html_str += '<table><tr>'
+
+        time_str = self['datetime'].strftime("%Y-%m-%d %H:%M")
+        mag_str = self._get_mag_str()
+        html_str += '<td>%s</td><td>%s</td>' % (time_str, mag_str)
+
+        if _make_table:
+            html_str += '</tr></table>'
+        return html_str
 
     @classmethod
     def from_segments(cls, segments):
@@ -268,3 +281,6 @@ class Tornado(SearchableItem):
             result = attr_list
 
         return result
+
+    def _get_mag_str(self):
+        return "EF%d" % self['mag'] if self['datetime'] >= datetime(2007, 2, 1, 0) else "F%d" % self['mag']
