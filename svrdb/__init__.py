@@ -1,4 +1,8 @@
 __all__ = [ 'svrlist', 'svrfactory', 'tornado', 'searchable', 'fips' ]
 
-from .svrlist import TornadoList, WindList, HailList
-from .searchable import byyear, bymonth, bycday, byhour
+import warnings
+
+with warnings.catch_warnings():
+    warnings.simplefilter('ignore')
+    from .svrlist import TornadoList, WindList, HailList
+    from .searchable import byyear, bymonth, bycday, byhour
