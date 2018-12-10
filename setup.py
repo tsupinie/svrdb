@@ -12,6 +12,6 @@ setup(
     keywords = 'meteorology spc reports',
     url = 'https://github.com/tsupinie/svrdb',
     packages = ['svrdb'],
-    package_data = {'svrdb':['svrdb/data/*']},
+    package_data = {'svrdb':['data/*']},
     include_package_data = True,
 )
