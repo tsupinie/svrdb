@@ -1,14 +1,16 @@
 
-import numpy as np
 
 from datetime import datetime, timedelta
 import copy
+import warnings
 
 try:
     import matplotlib as mpl
     import matplotlib.pyplot as plt
 
     import cartopy
+
+    import numpy as np
 except ImportError:
     _can_plot = False
 else:
