@@ -10,9 +10,9 @@ This package allows you to load and manipulate SPC severe reports, including sea
 
 ### Searching
 ```python
-from svrdb import TornadoDB, WindDB, HailDB
+from svrdb import TornadoList, WindList, HailList
 
-tor_db = TornadoDB.load_db()              # Load the tornado database
+tor_db = TornadoList.load_db()            # Load the tornado database
 ok_tors = tor_db.search(state='OK')       # Search for all tornadoes in Oklahoma
 ok_ef5 = ok_tors.search(magnitude=5)      # Search for all (E)F5 tornadoes in Oklahoma
 ok_ef5 = tor_db.search(state='OK', mag=5) # Same as the above two lines, but in one step
@@ -20,8 +20,8 @@ ok_ef5 = tor_db.search(state='OK', mag=5) # Same as the above two lines, but in 
 print(ok_ef5)                             # Print out results
 num_ok_ef5 = len(ok_ef5)                  # Get the number of tornadoes
 
-wind_db = WindDB.load_db()                # Load the wind database
-hail_db = HailDB.load_db()                # Load the hail database
+wind_db = WindList.load_db()              # Load the wind database
+hail_db = HailList.load_db()              # Load the hail database
 ```
 The above code should print out the following:
 ```
