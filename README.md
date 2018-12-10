@@ -132,7 +132,7 @@ for day, day_db in tor_days.items():
 * More spatial searching methods, such as searching within some distance of a point.
 * A "to grid" feature that would bin events on a spatial grid.
 * Better support for state-specific tallies.
-* Searching by counties
+* Searching by counties (partially complete)
 
 ## Caveats
 There are several caveats for working with these data.
