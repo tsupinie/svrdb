@@ -37,13 +37,15 @@ The above code should print out the following:
 8. 2013-05-20 19:56          OK   EF5
 ```
 
-The search function is fairly powerful. The basic structure is ```db.search(col=value, ...)```, where col is a column of the database. Columns common to all three databases are as follows:
+The search function is fairly powerful. The basic structure is ```db.search(col=value, ...)```, with as many (col, value) pairs as you want. The search function will return events that match all (col, value) pairs. As in the example above, `db.search(state='OK', mag=5)` will return all events whose magnitude is 5 (EF5 tornadoes) and whose state is 'OK' (occurring in Oklahoma).
+
+In this case, col is a column of the database. Columns common to all three databases are as follows:
 
 |           Column           |                      Description                       |
 | -------------------------- | ------------------------------------------------------ |
 | state (alias: st)          | Postal abbreviation of the state the event occurred in |
 | datetime                   | Date and time of the event (start time for tornadoes)  |
-| magnitude (alias: mag)     | Magnitude of the event                                 |
+| magnitude (alias: mag)     | Magnitude of the event. For tornadoes, this is the (E)F-scale category. For hail, it is the size in inches. For wind, it is the gust speed in kts. |
 | fatalities (alias: fat)    | Number of fatalities the event caused                  |
 | injuries (alias: inj)      | Number of injuries the event caused                    |
 | loss*                      | Property damage the event caused                       |
@@ -59,8 +61,8 @@ Columns only in the tornado database are as follows:
 | width (alias: wid)      | Path width for the tornado         |
 | start_lat (alias: slat) | Starting latitude for the tornado  |
 | start_lon (alias: slon) | Starting longitude for the tornado |
-| end_lat (alias: slat)   | Ending latitude for the tornado    |
-| end_lon (alias: slon)   | Ending longitude for the tornado   |
+| end_lat (alias: elat)   | Ending latitude for the tornado    |
+| end_lon (alias: elon)   | Ending longitude for the tornado   |
 
 Columns only in the wind and hail databases are as follows:
 
@@ -72,7 +74,7 @@ Columns only in the wind and hail databases are as follows:
 The value can take on several forms. 
 1. A string, integer or float. In this case the function searches for that value exactly. For example, `db.search(state='OK')` searches for events in Oklahoma, and `db.search(mag=1.75)` searches for events where the magnitude is exactly 1.75 (presumably this is a hail size in inches).
 2. A list or tuple. In this case, the function searches for events that match any of the items in the list. For example, `db.search(state=['OK', 'KS'])` searches for events that happen in either Oklahoma or Kansas, and `db.search(mag=[4, 5])` would search for magnitudes of 4 or 5 (presumeably (E)F-scale categories)
-3. A function. The function should take one argument that is a value and return a boolean. In this case, the search function searches for events that match criteria set by the passed function. For example, to search for all significant wind events, you could call `wind_db.search(mag=lambda s: s >= 75)`. 
+3. A function. The function should take one argument that is a value and return a boolean. In this case, the search function searches for events that match criteria set by the passed function. For example, to search for all significant wind events, you could call `wind_db.search(mag=lambda s: s >= 65)`. 
 
 Some helper functions are available for searching by dates and times.
 ```python
