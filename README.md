@@ -3,6 +3,7 @@ This package allows you to load and manipulate SPC severe reports, including sea
 
 ## Dependencies
 * pandas
+* numpy (optional)
 * matplotlib (optional)
 * cartopy (optional)
 
