@@ -36,7 +36,7 @@ class FIPS(Searchable):
         print(fips_code)
         return self.search(state_fips=st_fips, county_fips=cty_fips)[0]
 
-fips_fname = os.path.join(os.dirname(__file__), 'data', 'us_cty_fips.txt')
+fips_fname = os.path.join(os.path.dirname(__file__), 'data', 'us_cty_fips.txt')
 fips = FIPS.from_file(fips_fname)
 
 if __name__ == "__main__":
