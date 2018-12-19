@@ -68,7 +68,8 @@ def map_background(plotter):
         if not _can_plot:
             raise RuntimeError("Must have Matplotlib and Cartopy installed to plot")
 
-        proj = cartopy.crs.LambertConformal(central_longitude=-97.5)
+        lon_0 = sum(svr_list['slon']) / float(len(svr_list))
+        proj = cartopy.crs.LambertConformal(central_longitude=lon_0)
 
         plt.figure(dpi=150)
         ax = plt.axes(projection=proj)
@@ -78,17 +79,24 @@ def map_background(plotter):
         states_provinces = cartopy.feature.NaturalEarthFeature(
             category='cultural',
             name='admin_1_states_provinces_lakes',
-            scale='50m',
-            facecolor='none')
+            scale='50m')
         countries = cartopy.feature.NaturalEarthFeature(
             category='cultural',
             name='admin_0_countries_lakes',
-            scale='50m',
-            facecolor='none')
+            scale='50m')
+        ocean = cartopy.feature.NaturalEarthFeature(
+            category='physical',
+            name='ocean',
+            scale='50m')
+        urban = cartopy.feature.NaturalEarthFeature(
+            category='cultural',
+            name='urban_areas',
+            scale='50m')
 
-        ax.add_feature(states_provinces, edgecolor='k', linewidth=2, facecolor='none')
-        ax.add_feature(countries, edgecolor='k', linewidth=2, facecolor='none')
-        ax.add_feature(cartopy.feature.OCEAN, edgecolor='k', linewidth=2, facecolor='#00cccc')
+        ax.add_feature(urban, edgecolor='none', linewidth=1, facecolor='#dddddd')
+        ax.add_feature(states_provinces, edgecolor='k', linewidth=1, facecolor='none')
+        ax.add_feature(countries, edgecolor='k', linewidth=1, facecolor='none')
+        ax.add_feature(ocean, edgecolor='k', linewidth=1, facecolor='#00cccc')
 
         plt.tight_layout()
 
