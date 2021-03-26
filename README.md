@@ -1,11 +1,15 @@
 # svrdb
-This package allows you to load and manipulate SPC severe reports, including searching and basic plotting. It does all the work of matching the tornado segments from the all_tors database so you don't have to. The 2017 tornado, wind, and hail databases from SPC are included. Some basic QC is done (limited to fixing some tornado segments that should be matched), but otherwise the data are provided as-is from SPC. See [below](#caveats) for known caveats.
+This package allows you to load and manipulate SPC severe reports, including searching and basic plotting. It does all the work of matching the tornado segments from the all_tors database so you don't have to. The 2019 tornado, wind, and hail databases from SPC are included. Some basic QC is done (limited to fixing some tornado segments that should be matched), but otherwise the data are provided as-is from SPC. See [below](#caveats) for known caveats.
 
 ## Dependencies
 * pandas
 * numpy (optional)
 * matplotlib (optional)
 * cartopy (optional)
+
+## Installation
+
+Run `python setup.py install` to install.
 
 ## Usage
 
