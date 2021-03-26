@@ -61,8 +61,8 @@ Columns only in the tornado database are as follows:
 
 |          Column         |              Description           |
 | ----------------------- | ---------------------------------- |
-| length (alias: len)     | Path length for the tornado        |
-| width (alias: wid)      | Path width for the tornado         |
+| length (alias: len)     | Path length in statute miles for the tornado        |
+| width (alias: wid)      | Path width in yards for the tornado         |
 | start_lat (alias: slat) | Starting latitude for the tornado  |
 | start_lon (alias: slon) | Starting longitude for the tornado |
 | end_lat (alias: elat)   | Ending latitude for the tornado    |
