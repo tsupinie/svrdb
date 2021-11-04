@@ -48,6 +48,7 @@ In this case, col is a column of the database. Columns common to all three datab
 |           Column           |                      Description                       |
 | -------------------------- | ------------------------------------------------------ |
 | state (alias: st)          | Postal abbreviation of the state the event occurred in |
+| county                     | County name and state the event occurred in as a tuple (e.g. `county=('Tuscaloosa', 'AL')`) |
 | datetime                   | Date and time of the event (start time for tornadoes)  |
 | magnitude (alias: mag)     | Magnitude of the event. For tornadoes, this is the (E)F-scale category. For hail, it is the size in inches. For wind, it is the gust speed in kts. |
 | fatalities (alias: fat)    | Number of fatalities the event caused                  |
@@ -138,7 +139,6 @@ for day, day_db in tor_days.items():
 * More spatial searching methods, such as searching within some distance of a point.
 * A "to grid" feature that would bin events on a spatial grid.
 * Better support for state-specific tallies.
-* Searching by counties (partially complete)
 
 ## Caveats
 There are several caveats for working with these data.
