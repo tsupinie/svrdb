@@ -92,8 +92,13 @@ def map_background(plotter):
             category='cultural',
             name='urban_areas',
             scale='50m')
+        roads = cartopy.feature.NaturalEarthFeature(
+            category='cultural',
+            name='roads',
+            scale='10m')
 
         ax.add_feature(urban, edgecolor='none', linewidth=1, facecolor='#dddddd')
+        ax.add_feature(roads, edgecolor='#bbbbbb', linewidth=1, facecolor='none')
         ax.add_feature(states_provinces, edgecolor='k', linewidth=1, facecolor='none')
         ax.add_feature(countries, edgecolor='k', linewidth=1, facecolor='none')
         ax.add_feature(ocean, edgecolor='k', linewidth=1, facecolor='#00cccc')
