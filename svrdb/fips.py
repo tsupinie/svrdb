@@ -33,7 +33,7 @@ class FIPS(Searchable):
 
     def lookup_fips(self, fips_code):
         st_fips, cty_fips = divmod(fips_code, 1000)
-        print(fips_code)
+        #print(fips_code)
         return self.search(state_fips=st_fips, county_fips=cty_fips)[0]
 
 fips_fname = os.path.join(os.path.dirname(__file__), 'data', 'us_cty_fips.txt')
