@@ -70,6 +70,10 @@ class TornadoSegment(object):
         replace_fips(29677, 29077) # Typo on the FIPS code for Greene County, MO?
         replace_fips(21022, 21033) # Typo on the FIPS code for Caldwell County, KY?
         replace_fips(42159, 42015) # Typo on the FIPS code for Bradford County, PA?
+        replace_fips(2155, 2050) # Old code for Bethel Census Area?
+        replace_fips(72008, 72005) # Typo on the FIPS code for Aguadilla, PR?
+        replace_fips(2181, 2013) # Old code for Aleutians East Borough?
+        replace_fips(46113, 46102) # Shannon County, SD became Ogalala Lakota County
 
         # Patch some goofs I noticed in the database
         yr = kwargs['datetime'].year
@@ -283,4 +287,5 @@ class Tornado(SearchableItem):
         return result
 
     def _get_mag_str(self):
-        return "EF%d" % self['mag'] if self['datetime'] >= datetime(2007, 2, 1, 0) else "F%d" % self['mag']
+        mag_str = 'U' if self['mag'] < 0 else str(self['mag'])
+        return "EF%s" % mag_str if self['datetime'] >= datetime(2007, 2, 1, 0) else "F%s" % mag_str
