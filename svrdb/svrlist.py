@@ -1,6 +1,7 @@
 
 from .parsers import TornadoUnpacker, WindUnpacker, HailUnpacker
 from .searchable import Searchable
+from .fips import fips
 from .plotters import plot_tornadoes, plot_wind, plot_hail
 
 import pandas as pd
@@ -103,6 +104,20 @@ class SVRList(Searchable):
             html_str += '</tr>'
 
         return html_str + '</table>'
+
+    def search(self, **keys):
+        def extract_fips(fips_dct):
+            return fips_dct['state_fips'] * 1000 + fips_dct['county_fips']
+
+        if 'counties' in keys:
+            ctys = keys.pop('counties')
+            if type(ctys) == tuple:
+                cty_fips = extract_fips(fips.lookup_name(*ctys))
+            else:
+                cty_fips = [extract_fips(fips.lookup_name(*cty)) for cty in ctys]
+
+            keys['cty_fips'] = cty_fips
+        return super().search(**keys)
 
     def groupby(self, group):
         if '.' in group:
