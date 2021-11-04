@@ -92,17 +92,13 @@ class TornadoSegment(object):
 
 
     def merge(self, other):
-        # This fails for tornadoes that leave and then re-enter a state (for example, see OM#480993, 2013-11-17)
-        if self['ns'] == 1:
-            if self['sn'] == 1:
-                merge_sg = self
-            else:
-                merge_sg = other
+        seg_tup_self = (self['ns'], self['sn'], self['sg'])
+        seg_tup_other = (other['ns'], other['sn'], other['sg'])
+
+        if seg_tup_self in [(1, 1, 1), (2, 0, 1), (3, 0, 1)] or other['sg'] == -9:
+            merge_sg = self
         else:
-            if other['sn'] == 1:
-                merge_sg = other
-            else:
-                merge_sg = self
+            merge_sg = other
 
         merge_sg._attrs['cty_fips'] = self['cty_fips'] + other['cty_fips']
         return merge_sg
