@@ -109,8 +109,8 @@ class SVRList(Searchable):
         def extract_fips(fips_dct):
             return fips_dct['state_fips'] * 1000 + fips_dct['county_fips']
 
-        if 'counties' in keys:
-            ctys = keys.pop('counties')
+        if 'county' in keys:
+            ctys = keys.pop('county')
             if type(ctys) == tuple:
                 cty_fips = extract_fips(fips.lookup_name(*ctys))
             else:
