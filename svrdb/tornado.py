@@ -264,7 +264,7 @@ class Tornado(SearchableItem):
         if db_attr in [ 'wid', 'mag', 'closs', 'loss', 'fc' ]:
             result = max(attr_list)
         elif db_attr in [ 'len', 'fat', 'inj' ]:
-            result = sum(attr_list)
+            result = attr_list[0] #sum(attr_list)
         elif db_attr in [ 'datetime', 'slat', 'slon' ]:
             result = attr_list[0]
         elif db_attr in [ 'elat', 'elon' ]:
