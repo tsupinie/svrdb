@@ -32,6 +32,8 @@ class SVRList(Searchable):
         sio = StringIO(txt)
         df = pd.read_csv(sio, index_col=False, dtype={'mt': str})
 
+        df.sort_values(['date', 'time'], axis='index', inplace=True)
+
         unpacker = cls.unpacker()
         reports = unpacker.parse(df)
         svrs = unpacker.merge(reports)
@@ -150,17 +152,17 @@ class SVRList(Searchable):
 
 class TornadoList(SVRList, unpacker=TornadoUnpacker, 
                            plotter=plot_tornadoes,
-                           db_fname='1950-2019_all_tornadoes.csv'):
+                           db_fname='1950-2020_all_tornadoes.csv'):
     pass
 
 
 class WindList(SVRList, unpacker=WindUnpacker, 
                         plotter=plot_wind,
-                        db_fname='1955-2019_wind.csv'):
+                        db_fname='1955-2020_wind.csv'):
     pass
 
 
 class HailList(SVRList, unpacker=HailUnpacker, 
                         plotter=plot_hail,
-                        db_fname='1955-2019_hail.csv'):
+                        db_fname='1955-2020_hail.csv'):
     pass
