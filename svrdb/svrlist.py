@@ -152,17 +152,17 @@ class SVRList(Searchable):
 
 class TornadoList(SVRList, unpacker=TornadoUnpacker, 
                            plotter=plot_tornadoes,
-                           db_fname='1950-2020_all_tornadoes.csv'):
+                           db_fname='1950-2022_all_tornadoes.csv'):
     pass
 
 
 class WindList(SVRList, unpacker=WindUnpacker, 
                         plotter=plot_wind,
-                        db_fname='1955-2020_wind.csv'):
+                        db_fname='1955-2022_wind.csv'):
     pass
 
 
 class HailList(SVRList, unpacker=HailUnpacker, 
                         plotter=plot_hail,
-                        db_fname='1955-2020_hail.csv'):
+                        db_fname='1955-2022_hail.csv'):
     pass
